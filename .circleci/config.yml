@@ -1,19 +1,23 @@
 version: 2
 jobs:
   build-8.2.2:
-    docker: # use the docker executor type; machine and macos executors are also supported
-      - image: haskell:8.2.2 # the primary container, where your job's commands are run
+    docker:
+      - image: haskell:8.2.2
     steps:
-      - checkout # check out the code in the project directory
+      - checkout
       - run: ghc --version
       - run: cabal --version
+      - run: cabal new-build all
+      - run: cabal new-test all
   build-8.4.3:
-    docker: # use the docker executor type; machine and macos executors are also supported
-      - image: haskell:8.4.3 # the primary container, where your job's commands are run
+    docker:
+      - image: haskell:8.4.3
     steps:
-      - checkout # check out the code in the project directory
+      - checkout
       - run: ghc --version
       - run: cabal --version
+      - run: cabal new-build all
+      - run: cabal new-test all
 
 workflows:
   version: 2
