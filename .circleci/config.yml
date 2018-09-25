@@ -7,6 +7,7 @@ jobs:
       - checkout
       - run: ghc --version
       - run: cabal --version
+      - run: cabal new-update
       - run: cabal new-build all
       - run: cabal new-test all
   build-8.4.3:
@@ -16,6 +17,7 @@ jobs:
       - checkout
       - run: ghc --version
       - run: cabal --version
+      - run: cabal new-update
       - run: cabal new-build all
       - run: cabal new-test all
 
