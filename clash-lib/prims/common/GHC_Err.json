@@ -1,0 +1,22 @@
+[ { "BlackBox" :
+    { "name"      : "GHC.Err.error"
+    , "kind"      : "Expression"
+    , "type"      : "error :: [Char] -> a"
+    , "template"  : "~ERRORO"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Err.errorWithoutStackTrace"
+    , "kind"      : "Expression"
+    , "type"      : "errorWithoutStackTrace :: [Char] -> a"
+    , "template"  : "~ERRORO"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Err.undefined"
+    , "kind"      : "Expression"
+    , "type"      : "undefined :: a"
+    , "template"  : "~ERRORO"
+    }
+  }
+]

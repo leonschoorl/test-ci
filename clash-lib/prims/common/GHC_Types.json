@@ -1,0 +1,27 @@
+[ { "Primitive" :
+    { "name"      : "GHC.Types.MkCoercible"
+    , "primType"  : "Constructor"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Types.C#"
+    , "kind"      : "Expression"
+    , "type"      : "I# :: Char# -> Char"
+    , "template"  : "~ARG[0]"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Types.I#"
+    , "kind"      : "Expression"
+    , "type"      : "I# :: Int# -> Int"
+    , "template"  : "~ARG[0]"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Types.W#"
+    , "kind"      : "Expression"
+    , "type"      : "W# :: Word# -> Word"
+    , "template"  : "~ARG[0]"
+    }
+  }
+]

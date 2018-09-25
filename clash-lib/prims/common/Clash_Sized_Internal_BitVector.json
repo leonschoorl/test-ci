@@ -1,0 +1,53 @@
+[ { "BlackBox" :
+    { "name"      : "Clash.Sized.Internal.BitVector.undefined#"
+    , "kind"      : "Expression"
+    , "type"      : "undefined# :: forall n . KnownNat n => BitVector n"
+    , "template"  : "~ERRORO"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "Clash.Sized.Internal.BitVector.checkUnpackUndef"
+    , "kind"      : "Declaration"
+    , "type"      :
+"checkUnpackUndef
+  :: ( KnownNat n        -- ARG[0]
+     , Typeable a)       -- ARG[1]
+  => (BitVector n -> a)  -- ARG[2]
+  -> BitVector n         -- ARG[3]
+  -> a"
+    , "template"  :
+"~INST 2
+  ~OUTPUT <= ~RESULT~ ~TYPO~
+  ~INPUT  <= ~VAR[bv][3]~ ~TYP[3]~
+~INST"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "Clash.Sized.Internal.BitVector.lt##"
+    , "kind"      : "Expression"
+    , "type"      : "lt## :: Bit -> Bit -> Bool"
+    , "template"  : "~ARG[0] < ~ARG[1]"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "Clash.Sized.Internal.BitVector.ge##"
+    , "kind"      : "Expression"
+    , "type"      : "ge## :: Bit -> Bit -> Bool"
+    , "template"  : "~ARG[0] >= ~ARG[1]"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "Clash.Sized.Internal.BitVector.gt##"
+    , "kind"      : "Expression"
+    , "type"      : "gt## :: Bit -> Bit -> Bool"
+    , "template"  : "~ARG[0] > ~ARG[1]"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "Clash.Sized.Internal.BitVector.le##"
+    , "kind"      : "Expression"
+    , "type"      : "le## :: Bit -> Bit -> Bool"
+    , "template"  : "~ARG[0] <= ~ARG[1]"
+    }
+  }
+]

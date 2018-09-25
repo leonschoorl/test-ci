@@ -1,0 +1,134 @@
+[ { "BlackBox" :
+    { "name" : "Clash.Signal.Internal.delay#"
+    , "kind" : "Declaration"
+    , "type" :
+"delay#
+  :: (HasCallStack,Undefined a) -- (ARG[0],ARG[1])
+  => Clock domain gated       -- ARG[2]
+  -> Signal clk a             -- ARG[3]
+  -> Signal clk a"
+    , "template" :
+"// delay begin~IF ~ISGATED[2] ~THEN
+always_ff @(posedge ~ARG[2][1]) begin : ~GENSYM[~COMPNAME_delay][0]
+  if (~ARG[2][0]) begin
+    ~RESULT <= ~ARG[3];
+  end
+end~ELSE
+always_ff @(posedge ~ARG[2]) begin : ~SYM[0]
+  ~RESULT <= ~ARG[3];
+end~FI
+// delay end"
+    }
+  }
+, { "BlackBox" :
+    { "name" : "Clash.Signal.Internal.register#"
+    , "kind" : "Declaration"
+    , "type" :
+"register#
+  :: (HasCallStack, Undefined a) -- (ARG[0],ARG[1])
+  => Clock domain gated       -- ARG[2]
+  -> Reset domain synchronous -- ARG[3]
+  -> a                        -- ARG[4]
+  -> Signal clk a             -- ARG[5]
+  -> Signal clk a"
+    , "template" :
+"// register begin~IF ~ISGATED[2] ~THEN
+always_ff @(posedge ~ARG[2][1]~IF ~ISSYNC[3] ~THEN ~ELSE or posedge ~ARG[3]~FI) begin : ~GENSYM[~COMPNAME_register][0]
+  if (~ARG[3]) begin
+    ~RESULT <= ~ARG[4];
+  end else if (~ARG[2][0]) begin
+    ~RESULT <= ~ARG[5];
+  end
+end~ELSE
+always_ff @(posedge ~ARG[2]~IF ~ISSYNC[3] ~THEN ~ELSE or posedge ~ARG[3]~FI) begin : ~SYM[0]
+  if (~ARG[3]) begin
+    ~RESULT <= ~ARG[4];
+  end else begin
+    ~RESULT <= ~ARG[5];
+  end
+end~FI
+// register end"
+    }
+  }
+, { "BlackBox" :
+    { "name" : "Clash.Signal.Internal.clockGen"
+    , "kind" : "Declaration"
+    , "type" :
+"clockGen
+  :: (domain ~ Dom nm period -- ARG[0]
+     ,KnownSymbol nm         -- ARG[1]
+     ,KnownNat period)       -- ARG[2]
+  => Clock domain Source"
+    , "template" :
+"// pragma translate_off
+// 1 = 0.1ps
+localparam ~GENSYM[half_period][0] = (~LIT[2]0 / 2);
+always begin
+  ~RESULT = 0;
+  #3000 forever begin
+    ~RESULT = ~ ~RESULT;
+    #~SYM[0];
+    ~RESULT = ~ ~RESULT;
+    #~SYM[0];
+  end
+end
+// pragma translate_on"
+    }
+  }
+, { "BlackBox" :
+    { "name" : "Clash.Signal.Internal.tbClockGen"
+    , "kind" : "Declaration"
+    , "type" :
+"tbClockGen
+  :: (domain ~ Dom nm period -- ARG[0]
+     ,KnownSymbol nm         -- ARG[1]
+     ,KnownNat period)       -- ARG[2]
+  => Signal domain Bool      -- ARG[3]
+  -> Clock domain Source"
+    , "template" :
+"// pragma translate_off
+// 1 = 0.1ps
+localparam ~GENSYM[half_period][0] = (~LIT[2]0 / 2);
+always begin
+  ~RESULT = 0;
+  #3000 forever begin
+    if (~ ~ARG[3]) begin
+      $finish;
+    end
+    ~RESULT = ~ ~RESULT;
+    #~SYM[0];
+    ~RESULT = ~ ~RESULT;
+    #~SYM[0];
+  end
+end
+// pragma translate_on"
+    }
+  }
+, { "BlackBox" :
+    { "name" : "Clash.Signal.Internal.asyncResetGen"
+    , "kind" : "Declaration"
+    , "type" : "asyncResetGen :: Reset domain Asynchronous"
+    , "template" :
+"// pragma translate_off
+initial begin
+  #1    ~RESULT = 1;
+  #1999 ~RESULT = 0;
+end
+// pragma translate_on"
+    }
+  }
+, { "BlackBox" :
+    { "name" : "Clash.Signal.Internal.syncResetGen"
+    , "kind" : "Declaration"
+    , "type" : "asyncResetGen :: Reset domain Synchronous"
+    , "template" :
+"// pragma translate_off
+localparam ~GENSYM[reset_period][1] = 2998 + ~LIT[1]0;
+initial begin
+  #1 ~RESULT = 1;
+  #~SYM[1] ~RESULT = 0;
+end
+// pragma translate_on"
+    }
+  }
+]

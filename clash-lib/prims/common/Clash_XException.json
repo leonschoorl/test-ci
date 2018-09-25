@@ -1,0 +1,15 @@
+[ { "BlackBox" :
+    { "name"      : "Clash.XException.seqX"
+    , "kind"      : "Expression"
+    , "type"      : "seqX :: a -> b -> b"
+    , "template"  : "~ARG[1]"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "Clash.XException.errorX"
+    , "kind"      : "Expression"
+    , "type"      : "errorX :: HasCallStack -> String -> a"
+    , "template"  : "~ERRORO"
+    }
+  }
+]

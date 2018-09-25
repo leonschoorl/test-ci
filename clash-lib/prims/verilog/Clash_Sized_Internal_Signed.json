@@ -1,0 +1,57 @@
+[ { "BlackBox" :
+    { "name"      : "Clash.Sized.Internal.Signed.div#"
+    , "kind"      : "Declaration"
+    , "type"      : "div# :: Signed n -> Signed n -> Signed n"
+    , "template"  :
+"// divSigned begin
+// divide (rounds towards zero)
+wire ~SIGD[~GENSYM[quot_res][0]][1];
+assign ~SYM[0] = ~VAR[dividend][1] / ~VAR[divider][2];
+
+// round toward minus infinity
+assign ~RESULT = (~VAR[dividend][1][~LIT[0]-1] == ~VAR[divider][2][~LIT[0]-1]) ? ~SYM[0] : ~SYM[0] - ~LIT[0]'sd1;
+// divSigned end"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "Clash.Sized.Internal.Signed.mod#"
+    , "kind"      : "Declaration"
+    , "type"      : "mod# :: Signed n -> Signed n -> Signed n"
+    , "template"  :
+"// modSigned begin
+// remainder
+~SIGD[~GENSYM[rem_res][0]][0];
+assign ~SYM[0] = ~VAR[dividend][0] % ~VAR[divider][1];
+
+// modulo
+assign ~RESULT = (~VAR[dividend][0][~SIZE[~TYPO]-1] == ~VAR[divider][1][~SIZE[~TYPO]-1]) ?
+                 ~SYM[0] :
+                 (~VAR[dividend][0] == ~SIZE[~TYPO]'sd0 ? ~SIZE[~TYPO]'sd0 : ~SYM[0] + ~VAR[divider][1]);
+// modSigned end"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "Clash.Sized.Internal.Signed.rotateL#"
+    , "kind"      : "Declaration"
+    , "type"      : "rotateL# :: KnownNat n => Signed n -> Int -> Signed n"
+    , "template"  :
+"// rotateL begin
+wire [2*~LIT[0]-1:0] ~SYM[0];
+assign ~SYM[0] = {~ARG[1],~ARG[1]} << ~ARG[2];
+assign ~RESULT = $signed(~SYM[0][~LIT[0]-1 : 0]);
+// rotateL end"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "Clash.Sized.Internal.Signed.rotateR#"
+    , "kind"      : "Declaration"
+    , "type"      : "rotateR# :: KnownNat n => Signed n -> Int -> Signed n"
+    , "template"  :
+"// rotateR begin
+wire [2*~LIT[0]-1:0] ~GENSYM[s][0];
+assign ~SYM[0] = {~ARG[1],~ARG[1]} >> ~ARG[2];
+assign ~RESULT = $signed(~SYM[0][~LIT[0]-1 : 0]);
+// rotateR end"
+    }
+  }
+]

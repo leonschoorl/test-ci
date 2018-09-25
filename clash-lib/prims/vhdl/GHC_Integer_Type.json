@@ -1,0 +1,150 @@
+[ { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.smallInteger"
+    , "kind"      : "Expression"
+    , "type"      : "smallInteger :: Int# -> Integer"
+    , "template"  : "~ARG[0]"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.integerToInt"
+    , "kind"      : "Expression"
+    , "type"      : "integerToInt :: Integer -> Int#"
+    , "template"  : "~ARG[0]"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.timesInteger"
+    , "kind"      : "Expression"
+    , "type"      : "timesInteger :: Integer -> Integer -> Integer"
+    , "template"  : "resize(~ARG[0] * ~ARG[1],~SIZE[~TYPO])"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.negateInteger"
+    , "kind"      : "Expression"
+    , "type"      : "negateInteger :: Integer -> Integer"
+    , "template"  : "-~ARG[0]"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.absInteger"
+    , "kind"      : "Expression"
+    , "type"      : "absInteger :: Integer -> Integer"
+    , "template"  : "abs ~ARG[0]"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.divInteger"
+    , "kind"      : "Declaration"
+    , "type"      : "divInteger :: Integer -> Integer -> Integer"
+    , "template"   :
+"-- divInteger begin
+~GENSYM[divInteger][0] : block
+  signal ~GENSYM[quot_res][1] : ~TYP[1];
+begin
+  ~SYM[1] <= ~ARG[0] / ~ARG[1];
+  ~RESULT <= ~SYM[1] - 1 when ((~ARG[0] = abs ~ARG[0]) /= (~ARG[1] = abs ~ARG[1])) else
+             ~SYM[1];
+end block;
+-- divInteger end"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.modInteger"
+    , "kind"      : "Expression"
+    , "type"      : "modInteger :: Integer -> Integer -> Integer"
+    , "template"  : "~ARG[0] mod ~ARG[1]"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.remInteger"
+    , "kind"      : "Expression"
+    , "type"      : "remInteger :: Integer -> Integer -> Integer"
+    , "template"  : "~ARG[0] rem ~ARG[1]"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.eqInteger"
+    , "kind"      : "Expression"
+    , "type"      : "eqInteger :: Integer -> Integer -> Bool"
+    , "template"  : "~ARG[0] = ~ARG[1]"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.neqInteger"
+    , "kind"      : "Expression"
+    , "type"      : "neqInteger :: Integer -> Integer -> Bool"
+    , "template"  : "~ARG[0] /= ~ARG[1]"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.eqInteger#"
+    , "kind"      : "Declaration"
+    , "type"      : "eqInteger# :: Integer -> Integer -> Int#"
+    , "template"  : "~RESULT <= to_signed(1,~SIZE[~TYPO]) when ~ARG[0] = ~ARG[1] else to_signed(0,~SIZE[~TYPO]);"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.neqInteger#"
+    , "kind"      : "Declaration"
+    , "type"      : "neqInteger# :: Integer -> Integer -> Int#"
+    , "template"  : "~RESULT <= to_signed(1,~SIZE[~TYPO]) when ~ARG[0] /= ~ARG[1] else to_signed(0,~SIZE[~TYPO]);"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.leInteger#"
+    , "kind"      : "Declaration"
+    , "type"      : "leInteger# :: Integer -> Integer -> Int#"
+    , "template"  : "~RESULT <= to_signed(1,~SIZE[~TYPO]) when ~ARG[0] <= ~ARG[1] else to_signed(0,~SIZE[~TYPO]);"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.gtInteger#"
+    , "kind"      : "Declaration"
+    , "type"      : "gtInteger# :: Integer -> Integer -> Int#"
+    , "template"  : "~RESULT <= to_signed(1,~SIZE[~TYPO]) when ~ARG[0] > ~ARG[1] else to_signed(0,~SIZE[~TYPO]);"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.ltInteger#"
+    , "kind"      : "Declaration"
+    , "type"      : "ltInteger# :: Integer -> Integer -> Int#"
+    , "template"  : "~RESULT <= to_signed(1,~SIZE[~TYPO]) when ~ARG[0] < ~ARG[1] else to_signed(0,~SIZE[~TYPO]);"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.geInteger#"
+    , "kind"      : "Declaration"
+    , "type"      : "geInteger# :: Integer -> Integer -> Int#"
+    , "template"  : "~RESULT <= to_signed(1,~SIZE[~TYPO]) when ~ARG[0] >= ~ARG[1] else to_signed(0,~SIZE[~TYPO]);"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.shiftRInteger"
+    , "kind"      : "Expression"
+    , "type"      : "shiftRInteger :: Integer -> Int# -> Integer"
+    , "template"  : "shift_right(~ARG[0],to_integer(~ARG[1]))"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.shiftLInteger"
+    , "kind"      : "Expression"
+    , "type"      : "shiftLInteger :: Integer -> Int# -> Integer"
+    , "template"  : "shift_left(~ARG[0],to_integer(~ARG[1]))"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.wordToInteger"
+    , "kind"      : "Expression"
+    , "type"      : "wordToInteger :: Word# -> Integer"
+    , "template"  : "signed(std_logic_vector(~ARG[0]))"
+    }
+  }
+, { "BlackBox" :
+    { "name"      : "GHC.Integer.Type.integerToWord"
+    , "kind"      : "Expression"
+    , "type"      : "integerToWord :: Integer -> Word#"
+    , "template"  : "unsigned(std_logic_vector(~ARG[0]))"
+    }
+  }
+]
