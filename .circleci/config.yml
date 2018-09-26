@@ -10,6 +10,7 @@ jobs:
       - run: cabal new-update
       - run: cabal new-build all
       - run: cabal new-test all
+      - run: cabal new-run -- clash-testsuite -j16
   build-8.4.3:
     docker:
       - image: haskell:8.4.3
@@ -20,6 +21,7 @@ jobs:
       - run: cabal new-update
       - run: cabal new-build all
       - run: cabal new-test all
+      - run: cabal new-run -- clash-testsuite -j16
 
 workflows:
   version: 2
