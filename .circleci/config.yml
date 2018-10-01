@@ -8,6 +8,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: "Checkout submodules"
+          command: git submodule update --init
+      - run:
           name: Disable testing with Modelsim (SystemVerilog)
           command: |
             echo -e 'package clash-testsuite\n  flags: travisci' >> cabal.project && cat cabal.project
