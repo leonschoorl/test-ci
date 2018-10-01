@@ -13,7 +13,13 @@ jobs:
             source $BASH_ENV
       - run: ghc --version
       - run: cabal --version
+      - restore_cache:
+          key: cabal-store-8.4.3
       - run: cabal new-update
+      - save_cache:
+          key: cabal-store-8.4.3
+          paths:
+            - /root/.cabal/store
       - run: cabal new-build all
       - run: cabal new-test all
       - run: cabal new-run -- clash-testsuite -j16
