@@ -5,7 +5,7 @@ jobs:
       - image: leonschoorl/clash-ci-image:trusty
     steps:
       - checkout
-      - run: apt-get install -y cabal-install-head ghc-8.4.3
+      - run: apt-get update && apt-get install -y cabal-install-head ghc-8.4.3
       - run:
           name: Update PATH at Runtime
           command: |
