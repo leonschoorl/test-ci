@@ -3,6 +3,8 @@ jobs:
   build-8.4.3:
     docker:
       - image: leonschoorl/clash-ci-image:trusty
+        environment:
+          DEBIAN_FRONTEND: noninteractive
     steps:
       - checkout
       - run: apt-get update && apt-get install -y cabal-install-head ghc-8.4.3
