@@ -15,6 +15,7 @@ jobs:
           command: |
             echo -e 'package clash-testsuite\n  flags: travisci' >> cabal.project && cat cabal.project
       - run: apt-get update -q && apt-get install -yq cabal-install-head ghc-8.4.3
+      - run: apt-get install -yq build-essential g++-multilib
       - run:
           name: Update PATH at Runtime
           command: |
