@@ -7,14 +7,19 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
     steps:
       - checkout
+      - run:
+          name: Disable testing with Modelsim (SystemVerilog)
+          command: |
+            echo -e 'package clash-testsuite\n  flags: travisci' >> cabal.project && cat cabal.project
       - run: apt-get update -q && apt-get install -yq cabal-install-head ghc-8.4.3
       - run:
           name: Update PATH at Runtime
           command: |
             echo 'export PATH=/opt/ghc/bin:/opt/cabal/bin:$PATH' >> $BASH_ENV
             source $BASH_ENV
-      - run: ghc --version
-      - run: cabal --version
+      - run:
+          name: Show GHC and cabal versions
+          command: ghc --version && cabal --version
       - restore_cache:
           keys:
             - cabal-store-8.4.3-{{ checksum ".circleci/config.yml "}}
