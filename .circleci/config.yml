@@ -25,13 +25,13 @@ jobs:
           command: ghc --version && cabal --version
       - restore_cache:
           keys:
-            - cabal-store-8.4.3-{{ checksum ".circleci/config.yml" }}
+            - cabal-store-8.4.3-{{ checksum ".circleci/config.yml" }}-{{ checksum "cabal.project" }}
             - cabal-store-8.4.3-
       - run: cabal new-update
       - run: cabal new-build all
       - run: cabal new-test all
       - save_cache:
-          key: cabal-store-8.4.3-{{ checksum ".circleci/config.yml" }}
+          key: cabal-store-8.4.3-{{ checksum ".circleci/config.yml" }}-{{ checksum "cabal.project" }}
           paths:
             - /root/.cabal/store
       - run:
