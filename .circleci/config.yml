@@ -9,7 +9,7 @@ jobs:
       - checkout
       - run:
           name: "Checkout submodules"
-          command: git submodule update --init
+          command: git submodule update --init --depth 1
       - run:
           name: Disable testing with Modelsim (SystemVerilog)
           command: |
@@ -25,15 +25,15 @@ jobs:
           command: ghc --version && cabal --version
       - restore_cache:
           keys:
-            - cabal-store-8.4.3-{{ checksum ".circleci/config.yml"}}
+            - cabal-store-8.4.3-{{ checksum ".circleci/config.yml" }}
             - cabal-store-8.4.3-
       - run: cabal new-update
       - run: cabal new-build all
+      - run: cabal new-test all
       - save_cache:
-          key: cabal-store-8.4.3-{{ checksum ".circleci/config.yml"}}
+          key: cabal-store-8.4.3-{{ checksum ".circleci/config.yml" }}
           paths:
             - /root/.cabal/store
-      - run: cabal new-test all
       - run:
           name: Run clash-testsuite
           command: cabal new-run -- clash-testsuite -j16
