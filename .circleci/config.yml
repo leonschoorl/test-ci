@@ -71,6 +71,7 @@ workflows:
     jobs:
       - ghc-8.2.2
       - ghc-8.4.3
+      - ghc-head
 
 jobs:
   ghc-8.2.2:
@@ -82,4 +83,9 @@ jobs:
     environment:
       <<: *env
       GHC_VERSION: 8.4.3
+    <<: *build_default
+  ghc-head:
+    environment:
+      <<: *env
+      GHC_VERSION: head
     <<: *build_default
