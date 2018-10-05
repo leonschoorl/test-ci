@@ -49,11 +49,23 @@ aliases:
       name: Run clash-testsuite
       command: cabal new-run -- clash-testsuite -j16
 
+  # When testing a pull request CircleCI,
+  # fetch the result of merging it in.
+  - &merge_pullrequest
+    run:
+      name: Checkout pull request merge result
+      command: |
+        if [ -n "$CIRCLE_PR_NUMBER" ]; then
+          git fetch "$CIRCLE_REPOSITORY_URL" "pull/$CIRCLE_PR_NUMBER/merge:pull-$CIRCLE_PR_NUMBER-merged"
+          git checkout "pull-$CIRCLE_PR_NUMBER-merged"
+        fi
+
   - &build_default
     docker:
       - image: leonschoorl/clash-ci-image:trusty
     steps:
       - checkout
+      - *merge_pullrequest
       - *submodules
       - *install_ghc
       - *update_path
