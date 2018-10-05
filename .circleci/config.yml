@@ -4,7 +4,7 @@ workflows:
   version: 2
   build_multiple_ghc_version:
     jobs:
-      # - build-8.2.2
+      - build-8.2.2
       - build-8.4.3
 
 aliases:
@@ -36,12 +36,27 @@ aliases:
       paths:
         - /root/.cabal/store
 
+  - &configure_project
+    run:
+      name: Disable testing with Modelsim (SystemVerilog)
+      command: |
+        echo -e 'package clash-testsuite\n  flags: travisci' >> cabal.project && cat cabal.project
 
-jobs:
-  build-8.4.3:
-    environment:
-      <<: *env
-      GHC_VERSION: 8.4.3
+  - &cabal-update
+    run: cabal new-update
+
+  - &build-all
+    run: cabal new-build all
+
+  - &run-tests-cabal
+    run: cabal new-test all
+
+  - &run-clash-testsuite
+    run:
+      name: Run clash-testsuite
+      command: cabal new-run -- clash-testsuite -j16
+
+  - &build_default
     docker:
       - image: leonschoorl/clash-ci-image:trusty
     steps:
@@ -49,18 +64,24 @@ jobs:
       - *submodules
       - *install_ghc
       - *update_path
-      - run:
-          name: Disable testing with Modelsim (SystemVerilog)
-          command: |
-            echo -e 'package clash-testsuite\n  flags: travisci' >> cabal.project && cat cabal.project
-      - run:
-          name: Show GHC and cabal versions
-          command: ghc --version && cabal --version
+      - *configure_project
       - *cache_restore
-      - run: cabal new-update
-      - run: cabal new-build all
-      - run: cabal new-test all
+      - *cabal-update
+      - *build-all
+      - *run-tests-cabal
       - *cache_save
-      - run:
-          name: Run clash-testsuite
-          command: cabal new-run -- clash-testsuite -j16
+      - *run-clash-testsuite
+
+jobs:
+  build-8.4.3:
+    environment:
+      <<: *env
+      GHC_VERSION: 8.4.3
+    <<: *build_default
+
+  build-8.2.2:
+    environment:
+      <<: *env
+      GHC_VERSION: 8.2.2
+      CABAL_VERSION: 2.4
+    <<: *build_default
