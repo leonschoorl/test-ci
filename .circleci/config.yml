@@ -57,6 +57,7 @@ aliases:
       command: |
         if [ -n "$CIRCLE_PR_NUMBER" ]; then
           git fetch "$CIRCLE_REPOSITORY_URL" "pull/$CIRCLE_PR_NUMBER/merge:pull-$CIRCLE_PR_NUMBER-merged"
+          git rev-parse "pull-$CIRCLE_PR_NUMBER-merged"
           git checkout "pull-$CIRCLE_PR_NUMBER-merged"
         fi
 
