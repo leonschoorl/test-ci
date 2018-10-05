@@ -10,6 +10,7 @@ workflows:
 aliases:
   - &env
     DEBIAN_FRONTEND: noninteractive
+    CABAL_VERSION: head
   - &submodules
     run:
       name: "Checkout submodules"
@@ -17,7 +18,7 @@ aliases:
   - &install_ghc
     run:
       name: Install ghc and cabal-install
-      command: apt-get update -q && apt-get install -yq cabal-install-head ghc-$GHC_VERSION
+      command: apt-get update -q && apt-get install -yq cabal-install-$CABAL_VERSION ghc-$GHC_VERSION
   - &update_path
     run:
       name: Update PATH
@@ -27,22 +28,22 @@ aliases:
   - &cache_restore
     restore_cache:
       keys:
-        - cabal-store-{{.Environment.GHC_VERSION}}-{{ checksum ".circleci/config.yml" }}-{{ checksum "cabal.project" }}
-        - cabal-store-{{.Environment.GHC_VERSION}}-
+        - cabal-store-{{ .Environment.CIRCLE_JOB }}-{{ checksum ".circleci/config.yml" }}-{{ checksum "cabal.project" }}
+        - cabal-store-{{ .Environment.CIRCLE_JOB }}-
   - &cache_save
     save_cache:
-      key: cabal-store-{{.Environment.GHC_VERSION}}-{{ checksum ".circleci/config.yml" }}-{{ checksum "cabal.project" }}
+      key: cabal-store-{{ .Environment.CIRCLE_JOB }}-{{ checksum ".circleci/config.yml" }}-{{ checksum "cabal.project" }}
       paths:
         - /root/.cabal/store
 
 
 jobs:
   build-8.4.3:
+    environment:
+      <<: *env
+      GHC_VERSION: 8.4.3
     docker:
       - image: leonschoorl/clash-ci-image:trusty
-        environment:
-          GHC_VERSION: 8.4.3
-          <<: *env
     steps:
       - checkout
       - *submodules
