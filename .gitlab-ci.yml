@@ -1,12 +1,13 @@
 image: leonschoorl/clash-ci-image:trusty
 
+before_script:
+  - export PATH="/opt/ghc/bin:/opt/cabal/bin:$PATH"
+
 ghc-8.4.3:
   script:
     - pwd
     - id
-    - echo 'export PATH=/opt/ghc/bin:/opt/cabal/bin:$PATH' >> ~/.bashrc
-    - source ~/.bashrc
-    - bash --rcfile ~/bashrc -c export
+    - export
     - apt-get update -q && apt-get install -yq cabal-install-head ghc-8.4.3
-    - bash --rcfile ~/bashrc -c ghc --version
-    - bash --rcfile ~/bashrc -c cabal --version
+    - ghc --version
+    - cabal --version
