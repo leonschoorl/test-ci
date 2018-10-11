@@ -6,7 +6,7 @@ ghc-8.4.3:
     - id
     - echo 'export PATH=/opt/ghc/bin:/opt/cabal/bin:$PATH' >> ~/.bashrc
     - source ~/.bashrc
-    - export
+    - bash --rcfile ~/bashrc -c export
     - apt-get update -q && apt-get install -yq cabal-install-head ghc-8.4.3
-    - ghc --version
-    - cabal --version
+    - bash --rcfile ~/bashrc -c ghc --version
+    - bash --rcfile ~/bashrc -c cabal --version
