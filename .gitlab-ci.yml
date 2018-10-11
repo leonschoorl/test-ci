@@ -6,8 +6,9 @@ before_script:
 ghc-8.4.3:
   script:
     - pwd
-    - id
     - export
     - apt-get update -q && apt-get install -yq cabal-install-head ghc-8.4.3
     - ghc --version
     - cabal --version
+    - .ci/build.sh
+    - .ci/test.sh
