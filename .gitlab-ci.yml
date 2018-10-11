@@ -4,11 +4,33 @@ before_script:
   - export PATH="/opt/ghc/bin:/opt/cabal/bin:$PATH"
 
 ghc-8.4.3:
+  cache:
+    key: cabal-store-8.4.3
+    paths:
+      - /root/.cabal/.store
   script:
     - pwd
     - export
     - apt-get update -q && apt-get install -yq cabal-install-head ghc-8.4.3
     - ghc --version
     - cabal --version
+    - |
+      echo -e 'package clash-testsuite\n  flags: travisci' >> cabal.project.local && cat cabal.project.local
+    - .ci/build.sh
+    - .ci/test.sh
+
+ghc-8.2.2:
+  cache:
+    key: cabal-store-8.2.2
+    paths:
+      - /root/.cabal/.store
+  script:
+    - pwd
+    - export
+    - apt-get update -q && apt-get install -yq cabal-install-head ghc-8.2.2
+    - ghc --version
+    - cabal --version
+    - |
+      echo -e 'package clash-testsuite\n  flags: travisci' >> cabal.project.local && cat cabal.project.local
     - .ci/build.sh
     - .ci/test.sh
