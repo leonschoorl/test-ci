@@ -12,12 +12,6 @@ aliases:
     run:
       name: Install ghc and cabal-install
       command: apt-get update -q && apt-get install -yq cabal-install-$CABAL_VERSION ghc-$GHC_VERSION
-  - &update_path
-    run:
-      name: Update PATH
-      command: |
-        echo 'export PATH=/opt/ghc/bin:/opt/cabal/bin:$PATH' >> $BASH_ENV
-        source $BASH_ENV
   - &cache_restore
     restore_cache:
       keys:
@@ -69,7 +63,6 @@ aliases:
       - *merge_pullrequest
       - *submodules
       - *install_ghc
-      - *update_path
       - *configure_project
       - *cache_restore
       - *cabal-update

@@ -1,8 +1,5 @@
 image: leonschoorl/clash-ci-image:trusty
 
-before_script:
-  - export PATH="/opt/ghc/bin:/opt/cabal/bin:$PATH"
-
 ghc-8.4.3:
   cache:
     key: cabal-store-8.4.3
