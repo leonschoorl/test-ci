@@ -7,7 +7,7 @@ ghc-8.4.3:
   cache:
     key: cabal-store-8.4.3
     paths:
-      - /root/.cabal/.store
+      - /root/.cabal/store
   script:
     - pwd
     - export
@@ -15,7 +15,7 @@ ghc-8.4.3:
     - ghc --version
     - cabal --version
     - |
-      echo -e 'package clash-testsuite\n  flags: travisci' >> cabal.project.local && cat cabal.project.local
+      echo -e 'package clash-testsuite\n  flags: travisci\npackage *\n  documentation: False' >> cabal.project.local && cat cabal.project.local
     - .ci/build.sh
     - .ci/test.sh
 
@@ -23,7 +23,7 @@ ghc-8.2.2:
   cache:
     key: cabal-store-8.2.2
     paths:
-      - /root/.cabal/.store
+      - /root/.cabal/store
   script:
     - pwd
     - export
@@ -31,6 +31,6 @@ ghc-8.2.2:
     - ghc --version
     - cabal --version
     - |
-      echo -e 'package clash-testsuite\n  flags: travisci' >> cabal.project.local && cat cabal.project.local
+      echo -e 'package clash-testsuite\n  flags: travisci\npackage *\n  documentation: False' >> cabal.project.local && cat cabal.project.local
     - .ci/build.sh
     - .ci/test.sh
