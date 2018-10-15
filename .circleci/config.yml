@@ -30,18 +30,18 @@ aliases:
         echo -e 'package clash-testsuite\n  flags: travisci' >> cabal.project && cat cabal.project
 
   - &cabal-update
-    run: cabal new-update
+    run: taskset 1 cabal new-update
 
   - &build-all
-    run: cabal new-build all
+    run: taskset 1 cabal new-build all
 
   - &run-tests-cabal
-    run: cabal new-test all
+    run: taskset 1 cabal new-test all
 
   - &run-clash-testsuite
     run:
       name: Run clash-testsuite
-      command: cabal new-run -- clash-testsuite -j16
+      command: taskset 1 cabal new-run -- clash-testsuite -j16
 
   # When testing a pull request CircleCI,
   # fetch the result of merging it in.
