@@ -4,12 +4,13 @@ ghc-8.4.3:
   cache:
     key: cabal-store-8.4.3
     paths:
-      - ~/.cabal/store
+      - /root/.cabal/store/
   script:
     - pwd
     - export
     - cat /proc/cpuinfo
     - lscpu
+    - dirname ~/.cabal
     - ls -la --color ~
     - apt-get update -q && apt-get install -yq cabal-install-head ghc-8.4.3
     - ghc --version
@@ -24,7 +25,7 @@ ghc-8.2.2:
   cache:
     key: cabal-store-8.2.2
     paths:
-      - ~/.cabal/store
+      - ~/.cabal/store/
   script:
     - pwd
     - export
