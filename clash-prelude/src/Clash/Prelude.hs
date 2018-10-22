@@ -182,8 +182,6 @@ import           Clash.XException
 
 {- $setup
 >>> :set -XDataKinds -XFlexibleContexts
->>> let window2  = window  :: HiddenClockReset domain gated synchronous => Signal domain Int -> Vec 2 (Signal domain Int)
->>> let window3  = window  :: HiddenClockReset domain gated synchronous => Signal domain Int -> Vec 3 (Signal domain Int)
 >>> let window4  = window  :: HiddenClockReset domain gated synchronous => Signal domain Int -> Vec 4 (Signal domain Int)
 >>> let windowD3 = windowD :: HiddenClockReset domain gated synchronous => Signal domain Int -> Vec 3 (Signal domain Int)
 -}

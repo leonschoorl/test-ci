@@ -156,6 +156,7 @@ main = do
             ]
         , testGroup "Signal"
             [ runTest ("tests" </> "shouldwork" </> "Signal") defBuild [] "AlwaysHigh"      ([""],"AlwaysHigh_topEntity",False) -- Broken on GHC 8.0 due to: https://ghc.haskell.org/trac/ghc/ticket/11525
+            , outputTest ("tests" </> "shouldwork" </> "Signal") defBuild [] "BlockRamLazy"    ([""],"BlockRamLazy_topEntity",False) "main" -- Broken on GHC 8.0 due to: https://ghc.haskell.org/trac/ghc/ticket/11525
             , runTest ("tests" </> "shouldwork" </> "Signal") defBuild [] "BlockRamFile"    (["","BlockRamFile_testBench"],"BlockRamFile_testBench",True) -- Broken on GHC 8.0 due to: https://ghc.haskell.org/trac/ghc/ticket/11525
             , runTest ("tests" </> "shouldwork" </> "Signal") defBuild [] "BlockRamTest"    ([""],"BlockRamTest_topEntity",False)
             , runTest ("tests" </> "shouldwork" </> "Signal") defBuild [] "MAC"             ([""],"MAC_topEntity",False) -- Broken on GHC 8.0 due to: https://ghc.haskell.org/trac/ghc/ticket/11525
@@ -182,6 +183,16 @@ main = do
             [ runTest ("tests" </> "shouldwork" </> "Testbench") defBuild ["-fclash-inline-limit=0"] "TB" (["","TB_testBench"],"TB_testBench",True)
             , runTest ("tests" </> "shouldwork" </> "Testbench") defBuild [] "SyncTB"                    (["","SyncTB_testBench"],"SyncTB_testBench",True)
             ]
+        , testGroup "Types"
+            [ runTest ("tests" </> "shouldwork" </> "Types") defBuild [] "TypeFamilyReduction" ([""],"TypeFamilyReduction_topEntity",False)
+            ]
+        , testGroup "TopEntity"
+            -- VHDL tests disabled for now: I can't figure out how to generate a static name whilst retaining the ability to actually test..
+            [ runTest ("tests" </> "shouldwork" </> "TopEntity") Verilog [] "PortNames" (["","PortNames_topEntity","PortNames_testBench"],"PortNames_testBench",True)
+            , outputTest ("tests" </> "shouldwork" </> "TopEntity") Verilog [] "PortNames" (["","PortNames_topEntity","PortNames_testBench"],"PortNames_testBench",False) "main"
+            , runTest ("tests" </> "shouldwork" </> "TopEntity") Verilog [] "PortProducts" (["","PortProducts_topEntity","PortProducts_testBench"],"PortProducts_testBench",True)
+            , outputTest ("tests" </> "shouldwork" </> "TopEntity") Verilog [] "PortProducts" (["","PortProducts_topEntity","PortProducts_testBench"],"PortProducts_testBench",False) "main"
+            ]
         , testGroup "Vector"
             [ runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "Concat"    (["","Concat_testBench"],"Concat_testBench",True)
             , runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "DFold"     (["","DFold_testBench"],"DFold_testBench",True)
@@ -191,6 +202,7 @@ main = do
             , runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "FindIndex" (["","FindIndex_testBench"],"FindIndex_testBench",True)
             , runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "Fold"      (["","Fold_testBench"],"Fold_testBench",True)
             , runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "Foldr"     (["","Foldr_testBench"],"Foldr_testBench",True)
+            , runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "FoldrEmpty" (["","FoldrEmpty_testBench"],"FoldrEmpty_testBench",True)
             , runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "HOClock"   ([""],"HOClock_topEntity",False) -- Broken on GHC 8.0 due to: https://ghc.haskell.org/trac/ghc/ticket/115
             , runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "HOCon"     ([""],"HOCon_topEntity",False)
             , runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "HOPrim"    ([""],"HOPrim_topEntity",False)
@@ -203,6 +215,7 @@ main = do
             , runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "ToList"    (["","ToList_testBench"],"ToList_testBench",True)
             , runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "Unconcat"  (["","Unconcat_testBench"],"Unconcat_testBench",True)
             , runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "VACC"      ([""],"VACC_topEntity",False)
+            , runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "VEmpty"    (["", "VEmpty_testBench"],"VEmpty_testBench",True)
             , runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "VIndex"    ([""],"VIndex_topEntity",False)
             , runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "VFold"     (["","VFold_testBench"],"VFold_testBench",True)
             , runTest ("tests" </> "shouldwork" </> "Vector") defBuild [] "VMapAccum" ([""],"VMapAccum_topEntity",False)
@@ -441,9 +454,9 @@ runTest'
   -> String
   -> ([String],String,Bool)
   -> [ExtraTestFunc]
-  -> TestTree
+  -> [TestTree]
 runTest' env VHDL extraArgs modName (subdirs, entName, doSim) extraTests =
-  withResource acquire tastyRelease (createTestTrees "VHDL" seqTests)
+  [withResource acquire tastyRelease (createTestTrees "VHDL" seqTests)]
     where
       cwDir   = Unsafe.unsafePerformIO $ Directory.getCurrentDirectory
       vhdlDir = "vhdl"
@@ -464,7 +477,7 @@ runTest' env VHDL extraArgs modName (subdirs, entName, doSim) extraTests =
           ++ [map (\f -> f (cwDir </> env) VHDL vhdlDir modDir modName entName) extraTests]
 
 runTest' env Verilog extraArgs modName (subdirs, entName, doSim) extraTests =
-  withResource acquire tastyRelease (createTestTrees "Verilog" seqTests)
+  [withResource acquire tastyRelease (createTestTrees "Verilog" seqTests)]
     where
       cwDir      = Unsafe.unsafePerformIO $ Directory.getCurrentDirectory
       verilogDir = "verilog"
@@ -478,7 +491,7 @@ runTest' env Verilog extraArgs modName (subdirs, entName, doSim) extraTests =
           ++ map (\f -> f (cwDir </> env) Verilog verilogDir modDir modName entName) extraTests
 
 runTest' env SystemVerilog extraArgs modName (subdirs,entName,doSim) extraTests =
-  withResource acquire tastyRelease (createTestTrees "SystemVerilog" seqTests)
+  [withResource acquire tastyRelease (createTestTrees "SystemVerilog" seqTests)]
     where
       cwDir   = Unsafe.unsafePerformIO $ Directory.getCurrentDirectory
       svDir   = "systemverilog"
@@ -492,12 +505,12 @@ runTest' env SystemVerilog extraArgs modName (subdirs,entName,doSim) extraTests 
           ] ++ [if doSim then [vsim modDir entName] else []]
             ++ [map (\f -> f (cwDir </> env) SystemVerilog svDir modDir modName entName) extraTests]
 
-runTest' env Both extraArgs modName entNameM extraTests = testGroup modName
+runTest' env Both extraArgs modName entNameM extraTests = concat
   [ runTest' env VHDL extraArgs modName entNameM extraTests
   , runTest' env Verilog extraArgs modName entNameM extraTests
   ]
 
-runTest' env All extraArgs modName entNameM extraTests = testGroup modName
+runTest' env All extraArgs modName entNameM extraTests = concat
   [ runTest' env VHDL extraArgs modName entNameM extraTests
   , runTest' env Verilog extraArgs modName entNameM extraTests
   , runTest' env SystemVerilog extraArgs modName entNameM extraTests
@@ -511,7 +524,7 @@ runTest
   -> ([String],String,Bool)
   -> TestTree
 runTest env target extraArgs modName (subdirs,entName,doSim) =
-  runTest' env target extraArgs modName (subdirs,entName,doSim) []
+  testGroup modName (runTest' env target extraArgs modName (subdirs,entName,doSim) [])
 
 runFailingTest'
   :: FilePath
@@ -620,4 +633,5 @@ outputTest
   -> String
   -> TestTree
 outputTest env target extraArgs modName entNameM funcName =
-  runTest' env target extraArgs modName entNameM [outputTest' funcName]
+  let testName = modName ++ " [output test]" in
+  testGroup testName (runTest' env target extraArgs modName entNameM [outputTest' funcName])
