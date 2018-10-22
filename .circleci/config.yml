@@ -44,6 +44,12 @@ aliases:
   - &build-all
     run: cabal new-build all
 
+  - &build-all-constraint
+    run:
+      name: Build with installed constraints for packages in global-db
+      command: |
+        echo cabal new-build ghc-pkg list --global --simple-output --names-only | sed 's/\([a-zA-Z0-9-]\{1,\}\) */--constraint="\1 installed" /g') all | sh
+
   - &run-tests-cabal
     run: cabal new-test all
 
@@ -77,6 +83,7 @@ aliases:
       - *cache_restore
       - *cabal-update
       - *build-all
+      - *build-all-constraint
       - *run-tests-cabal
       - *cache_save
       - *run-clash-testsuite
