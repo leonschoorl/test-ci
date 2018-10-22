@@ -25,9 +25,18 @@ aliases:
 
   - &configure_project
     run:
-      name: Disable testing with Modelsim (SystemVerilog)
+      name: Configure project
       command: |
-        echo -e 'package clash-testsuite\n  flags: travisci' >> cabal.project && cat cabal.project
+        cat > cabal.project.local << END_CABAL_PROJECT_LOCAL
+        package clash-prelude
+          documentation: True
+        package clash-lib
+          documentation: True
+        package clash-cosim
+          documentation: True
+        package clash-testsuite
+          flags: cosim travisci
+        END_CABAL_PROJECT_LOCAL
 
   - &cabal-update
     run: cabal new-update
@@ -64,6 +73,7 @@ aliases:
       - *submodules
       - *install_ghc
       - *configure_project
+      - run: cat cabal.project.local
       - *cache_restore
       - *cabal-update
       - *build-all
