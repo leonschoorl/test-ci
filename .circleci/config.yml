@@ -49,7 +49,7 @@ aliases:
     run:
       name: Build with installed constraints for packages in global-db
       command: |
-        echo cabal new-build ghc-pkg list --global --simple-output --names-only | sed 's/\([a-zA-Z0-9-]\{1,\}\) */--constraint="\1 installed" /g') all | sh
+        echo cabal new-build $(ghc-pkg list --global --simple-output --names-only | sed 's/\([a-zA-Z0-9-]\{1,\}\) */--constraint="\1 installed" /g') all | sh
 
   - &run-tests-cabal
     run: cabal new-test all
@@ -75,7 +75,6 @@ aliases:
     docker:
       - image: leonschoorl/clash-ci-image:trusty
     steps:
-      - run: export
       - checkout
       - *merge_pullrequest
       - *submodules
