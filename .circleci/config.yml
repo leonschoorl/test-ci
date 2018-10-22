@@ -74,6 +74,7 @@ aliases:
     docker:
       - image: leonschoorl/clash-ci-image:trusty
     steps:
+      - run: export
       - checkout
       - *merge_pullrequest
       - *submodules
