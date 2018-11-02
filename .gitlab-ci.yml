@@ -1,18 +1,20 @@
 image: leonschoorl/clash-ci-image:trusty
 
-ghc-8.4.3:
+ghc-8.4.4:
   cache:
-    key: cabal-store-8.4.3
+    key: cabal-store-8.4.4
     paths:
-      - ../../../root/.cabal/store/
+      - .cabal/store/
   script:
     - pwd
+    - echo $HOME
+    - export HOME=$(pwd)
     - export
     - cat /proc/cpuinfo
     - lscpu
     - dirname ~/.cabal
     - ls -la --color ~
-    - apt-get update -q && apt-get install -yq cabal-install-head ghc-8.4.3
+    - apt-get update -q && apt-get install -yq cabal-install-head ghc-8.4.4
     - ghc --version
     - cabal --version
     - |
@@ -25,9 +27,11 @@ ghc-8.2.2:
   cache:
     key: cabal-store-8.2.2
     paths:
-      - ../../../root/.cabal/store/
+      - .cabal/store/
   script:
     - pwd
+    - echo $HOME
+    - export HOME=$(pwd)
     - export
     - apt-get update -q && apt-get install -yq cabal-install-head ghc-8.2.2
     - ghc --version
