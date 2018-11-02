@@ -102,7 +102,7 @@ jobs:
       <<: *env
       GHC_VERSION: 8.2.2
     <<: *build_default
-  ghc-8.4.3:
+  ghc-8.4.4:
     environment:
       <<: *env
       GHC_VERSION: 8.4.4
