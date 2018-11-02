@@ -24,7 +24,6 @@ import           Control.Lens                         hiding (Indexed)
 import           Control.Monad                        (forM,join,liftM,zipWithM)
 import           Control.Monad.State                  (State)
 import           Data.Bits                            (testBit, Bits)
-import           Data.Graph.Inductive                 (Gr, mkGraph, topsort')
 import           Data.Hashable                        (Hashable)
 import           Data.HashMap.Lazy                    (HashMap)
 import qualified Data.HashMap.Lazy                    as HashMap
@@ -61,6 +60,7 @@ import           Clash.Netlist.Util                   hiding (mkIdentifier)
 import           Clash.Signal.Internal                (ClockKind (..))
 import           Clash.Util
   (SrcSpan, noSrcSpan, clogBase, curLoc, first, makeCached, on, traceIf, (<:>))
+import           Clash.Util.Graph                     (reverseTopSort)
 
 #ifdef CABAL
 import qualified Paths_clash_lib
@@ -135,13 +135,15 @@ instance Backend VHDLState where
   hdlSyn          = use hdlsyn
   mkIdentifier    = return go
     where
-      go Basic    nm = filterReserved (TextS.toLower (mkBasicId' True nm))
+      go Basic nm = (stripTrailingUnderscore . filterReserved)
+                    (TextS.toLower (mkBasicId' True nm))
       go Extended (rmSlash -> nm) = case go Basic nm of
         nm' | nm /= nm' -> TextS.concat ["\\",nm,"\\"]
             |otherwise  -> nm'
   extendIdentifier = return go
     where
-      go Basic nm ext = filterReserved (TextS.toLower (mkBasicId' True (nm `TextS.append` ext)))
+      go Basic nm ext = (stripTrailingUnderscore . filterReserved)
+                        (TextS.toLower (mkBasicId' True (nm `TextS.append` ext)))
       go Extended ((rmSlash . escapeTemplate) -> nm) ext =
         let nmExt = nm `TextS.append` ext
         in  case go Basic nm ext of
@@ -211,6 +213,9 @@ filterReserved :: Identifier -> Identifier
 filterReserved s = if s `elem` reservedWords
   then s `TextS.append` "_r"
   else s
+
+stripTrailingUnderscore :: Identifier -> Identifier
+stripTrailingUnderscore = TextS.dropWhileEnd (== '_') -- TextS.takeWhile (/= '_')
 
 -- | Generate VHDL for a Netlist component
 genVHDL :: Identifier -> SrcSpan -> [Identifier] -> Component -> VHDLM ((String,Doc),[(String,Doc)])
@@ -283,22 +288,25 @@ mkUsedTys p@(Product _ elTys) = p : concatMap mkUsedTys elTys
 mkUsedTys sp@(SP _ elTys)     = sp : concatMap mkUsedTys (concatMap snd elTys)
 mkUsedTys t                   = [t]
 
-topSortHWTys :: [HWType]
-             -> [HWType]
+topSortHWTys
+  :: [HWType]
+  -> [HWType]
 topSortHWTys hwtys = sorted
   where
     nodes  = zip [0..] hwtys
     nodesI = HashMap.fromList (zip hwtys [0..])
     edges  = concatMap edge hwtys
-    graph  = mkGraph nodes edges :: Gr HWType ()
-    sorted = reverse $ topsort' graph
+    sorted =
+      case reverseTopSort nodes edges of
+        Left err -> error ("[BUG IN CLASH] topSortHWTys: " ++ err)
+        Right ns -> ns
 
-    edge t@(Vector _ elTy) = maybe [] ((:[]) . (HashMap.lookupDefault (error $ $(curLoc) ++ "Vector") t nodesI,,()))
+    edge t@(Vector _ elTy) = maybe [] ((:[]) . (HashMap.lookupDefault (error $ $(curLoc) ++ "Vector") t nodesI,))
                                       (HashMap.lookup (mkVecZ elTy) nodesI)
-    edge t@(RTree _ elTy)  = maybe [] ((:[]) . (HashMap.lookupDefault (error $ $(curLoc) ++ "RTree") t nodesI,,()))
+    edge t@(RTree _ elTy)  = maybe [] ((:[]) . (HashMap.lookupDefault (error $ $(curLoc) ++ "RTree") t nodesI,))
                                       (HashMap.lookup (mkVecZ elTy) nodesI)
     edge t@(Product _ tys) = let ti = HashMap.lookupDefault (error $ $(curLoc) ++ "Product") t nodesI
-                             in mapMaybe (\ty -> liftM (ti,,()) (HashMap.lookup (mkVecZ ty) nodesI)) tys
+                             in mapMaybe (\ty -> liftM (ti,) (HashMap.lookup (mkVecZ ty) nodesI)) tys
     edge _                 = []
 
 normaliseType :: HWType -> VHDLM HWType
