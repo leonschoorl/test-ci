@@ -223,7 +223,9 @@ outputVerifierBitVector
 outputVerifierBitVector clk rst samples i =
     let (s,o) = unbundle (genT <$> register clk rst 0 s)
         (e,f) = unbundle o
-    in  assertBitVector clk rst "outputVerifierBitVector" i e (register clk rst False f)
+        f'    = register clk rst False f
+        -- Only assert while not finished
+    in  mux f' f' $ assertBitVector clk rst "outputVerifierBitVector" i e f'
   where
     genT :: Index l -> (Index l,(BitVector n,Bool))
     genT s = (s',(samples !! s,finished))
