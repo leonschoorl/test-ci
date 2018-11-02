@@ -37,7 +37,7 @@ RUN apt-get remove -y $DEPS_IVERILOG_BUILD software-properties-common && \
 # keep the apt package cache
 RUN rm /etc/apt/apt.conf.d/docker-clean
 
-ARG PREFETCH="cabal-install-head ghc-8.2.2 ghc-8.4.3"
+ARG PREFETCH="cabal-install-head ghc-8.2.2 ghc-8.4.4 ghc-8.6.2"
 
 # Prefetch some packages for speedy installation
 RUN apt-get install -y --download-only $PREFETCH
