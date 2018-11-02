@@ -4,7 +4,7 @@ ghc-8.4.3:
   cache:
     key: cabal-store-8.4.3
     paths:
-      - /root/.cabal/store/
+      - ../../../root/.cabal/store/
   script:
     - pwd
     - export
@@ -25,7 +25,7 @@ ghc-8.2.2:
   cache:
     key: cabal-store-8.2.2
     paths:
-      - ~/.cabal/store/
+      - ../../../root/.cabal/store/
   script:
     - pwd
     - export
