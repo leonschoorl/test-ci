@@ -40,6 +40,6 @@ RUN rm /etc/apt/apt.conf.d/docker-clean
 ARG PREFETCH="cabal-install-head ghc-8.2.2 ghc-8.4.4 ghc-8.6.2"
 
 # Prefetch some packages for speedy installation
-RUN apt-get install -y --download-only $PREFETCH
+RUN apt-get update && apt-get install -y --download-only $PREFETCH
 
 ENV PATH /opt/ghc/bin:/opt/cabal/bin:$PATH
