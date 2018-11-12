@@ -27,4 +27,4 @@ ghc-head:
   allow_failure: true
   script:
     - echo cabal head currently not working...
-    - false
+    - exit 1
