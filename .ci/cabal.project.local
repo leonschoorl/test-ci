@@ -1,0 +1,16 @@
+-- disable SystemVerilog testing & enable cosim
+package clash-testsuite
+  flags: travisci cosim
+
+-- don't generate haddock for all our deps
+package *
+  documentation: False
+-- only do haddock for these
+package clash-lib
+  documentation: True
+package clash-prelude
+  documentation: True
+package clash-cosim
+  documentation: True
+
+index-state: HEAD
