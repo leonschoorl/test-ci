@@ -16,6 +16,7 @@
 module Clash.GHC.LoadModules
   ( loadModules
   , ghcLibDir
+  , wantedLanguageExtensions
   )
 where
 
@@ -72,6 +73,7 @@ import qualified OccName
 import           Outputable                      (ppr)
 import qualified Outputable
 import qualified UniqSet
+import           Util (OverridingBool)
 import qualified Var
 
 -- Internal Modules
@@ -108,9 +110,14 @@ getProcessOutput command =
      return (output, exitCode)
 
 loadModules
-  :: HDL
+  :: OverridingBool
+  -- ^ Use color
+  -> HDL
+  -- ^ HDL target
   -> String
+  -- ^ Module name
   -> Maybe (DynFlags.DynFlags)
+  -- ^ Flags to run GHC with
   -> IO ( [CoreSyn.CoreBind]                     -- Binders
         , [(CoreSyn.CoreBndr,Int)]               -- Class operations
         , [CoreSyn.CoreBndr]                     -- Unlocatable Expressions
@@ -121,7 +128,7 @@ loadModules
         , [FilePath]
         , [DataRepr']
         )
-loadModules hdl modName dflagsM = do
+loadModules useColor hdl modName dflagsM = do
   libDir <- MonadUtils.liftIO ghcLibDir
 
   GHC.runGhc (Just libDir) $ do
@@ -137,37 +144,14 @@ loadModules hdl modName dflagsM = do
 #else
                   df <- GHC.getSessionDynFlags
 #endif
-                  let dfEn = foldl DynFlags.xopt_set df
-                                [ LangExt.TemplateHaskell
-                                , LangExt.TemplateHaskellQuotes
-                                , LangExt.DataKinds
-                                , LangExt.MonoLocalBinds
-                                , LangExt.TypeOperators
-                                , LangExt.FlexibleContexts
-                                , LangExt.ConstraintKinds
-                                , LangExt.TypeFamilies
-                                , LangExt.BinaryLiterals
-                                , LangExt.ExplicitNamespaces
-                                , LangExt.KindSignatures
-                                , LangExt.DeriveLift
-                                , LangExt.TypeApplications
-                                , LangExt.ScopedTypeVariables
-                                , LangExt.MagicHash
-                                , LangExt.ExplicitForAll
-                                , LangExt.QuasiQuotes
-                                ]
-                  let dfDis = foldl DynFlags.xopt_unset dfEn
-                                [ LangExt.ImplicitPrelude
-                                , LangExt.MonomorphismRestriction
-                                , LangExt.Strict
-                                , LangExt.StrictData
-                                ]
+                  let df1 = wantedLanguageExtensions df
                   let ghcTyLitNormPlugin = GHC.mkModuleName "GHC.TypeLits.Normalise"
                       ghcTyLitExtrPlugin = GHC.mkModuleName "GHC.TypeLits.Extra.Solver"
                       ghcTyLitKNPlugin   = GHC.mkModuleName "GHC.TypeLits.KnownNat.Solver"
-                  let dfPlug = dfDis { DynFlags.pluginModNames = nub $
+                  let dfPlug = df1 { DynFlags.pluginModNames = nub $
                                           ghcTyLitNormPlugin : ghcTyLitExtrPlugin :
-                                          ghcTyLitKNPlugin : DynFlags.pluginModNames dfDis
+                                          ghcTyLitKNPlugin : DynFlags.pluginModNames df1
+                                     , DynFlags.useColor = useColor
                                      }
                   return dfPlug
 
@@ -525,6 +509,38 @@ wantedOptimizationFlags df =
 -- properly. At the moment, Clash cannot deal with this recursive type and the
 -- recursive functions involved, and hence we need to disable this useful transformation. After
 -- everything is done properly, we should enable it again.
+
+
+wantedLanguageExtensions :: GHC.DynFlags -> GHC.DynFlags
+wantedLanguageExtensions df =
+    foldl' DynFlags.xopt_unset
+      (foldl' DynFlags.xopt_set df wanted) unwanted
+  where
+    wanted = [ LangExt.TemplateHaskell
+             , LangExt.TemplateHaskellQuotes
+             , LangExt.DataKinds
+             , LangExt.MonoLocalBinds
+             , LangExt.TypeOperators
+             , LangExt.FlexibleContexts
+             , LangExt.ConstraintKinds
+             , LangExt.TypeFamilies
+             , LangExt.BinaryLiterals
+             , LangExt.ExplicitNamespaces
+             , LangExt.KindSignatures
+             , LangExt.DeriveLift
+             , LangExt.TypeApplications
+             , LangExt.ScopedTypeVariables
+             , LangExt.MagicHash
+             , LangExt.ExplicitForAll
+             , LangExt.QuasiQuotes
+             , LangExt.DeriveGeneric
+             , LangExt.DeriveAnyClass
+             ]
+    unwanted = [ LangExt.ImplicitPrelude
+               , LangExt.MonomorphismRestriction
+               , LangExt.Strict
+               , LangExt.StrictData
+               ]
 
 -- | Remove all strictness annotations:
 --

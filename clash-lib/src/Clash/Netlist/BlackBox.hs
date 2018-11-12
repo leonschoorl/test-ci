@@ -18,18 +18,28 @@
 module Clash.Netlist.BlackBox where
 
 import           Control.Exception             (throw)
-import           Control.Lens                  ((<<%=))
+import           Control.Lens                  ((<<%=),(%=))
 import qualified Control.Lens                  as Lens
+import           Control.Monad                 (when)
+import           Control.Monad.IO.Class        (liftIO)
 import           Data.Char                     (ord)
 import           Data.Either                   (lefts)
 import qualified Data.HashMap.Lazy             as HashMap
 import qualified Data.IntMap                   as IntMap
 import           Data.Maybe                    (catMaybes)
 import           Data.Semigroup.Monad
+import qualified Data.Set                      as Set
 import           Data.Text.Lazy                (fromStrict)
 import qualified Data.Text.Lazy                as Text
 import           Data.Text                     (unpack)
 import qualified Data.Text                     as TextS
+import qualified System.Console.ANSI           as ANSI
+import           System.Console.ANSI
+  ( hSetSGR, SGR(SetConsoleIntensity, SetColor), Color(Magenta)
+  , ConsoleIntensity(BoldIntensity), ConsoleLayer(Foreground), ColorIntensity(Vivid))
+import           System.IO
+  (hPutStrLn, stderr, hFlush, hIsTerminalDevice)
+import           Util                          (OverridingBool(..))
 
 -- import           Clash.Backend                 as N
 import           Clash.Core.DataCon            as D (dcTag)
@@ -51,6 +61,8 @@ import {-# SOURCE #-} Clash.Netlist
   (genComponent, mkDcApplication, mkDeclarations, mkExpr, mkNetDecl,
    mkProjection, mkSelection)
 import qualified Clash.Backend                 as Backend
+import           Clash.Driver.Types
+  (opt_primWarn, opt_color, ClashOpts)
 import           Clash.Netlist.BlackBox.Types  as B
 import           Clash.Netlist.BlackBox.Util   as B
 import           Clash.Netlist.Id              (IdType (..))
@@ -61,6 +73,24 @@ import           Clash.Primitives.Types        as P
 import           Clash.Unique                  (lookupUniqMap')
 import           Clash.Util
 
+-- | Emits (colorized) warning to stderr
+warn
+  :: ClashOpts
+  -> String
+  -> IO ()
+warn opts msg = do
+  -- TODO: Put in appropriate module
+  useColor <-
+    case opt_color opts of
+      Always -> return True
+      Never  -> return False
+      Auto   -> hIsTerminalDevice stderr
+
+  hSetSGR stderr [SetConsoleIntensity BoldIntensity]
+  when useColor $ hSetSGR stderr [SetColor Foreground Vivid Magenta]
+  hPutStrLn stderr $ "[WARNING] " ++ msg
+  hSetSGR stderr [ANSI.Reset]
+  hFlush stderr
 
 -- | Generate the context for a BlackBox instantiation.
 mkBlackBoxContext
@@ -183,7 +213,23 @@ mkPrimitive bbEParen bbEasD dst nm args ty = do
   where
     go =
       \case
-        Just p@(P.BlackBox {outputReg = wr}) -> do
+        Just p@(P.BlackBox {outputReg = wr, warning = wn}) -> do
+          -- Print blackbox warning if warning is set on this blackbox and
+          -- printing warnings is enabled globally
+          isTB <- Lens.use isTestBench
+          opts <- Lens.use clashOpts
+          primWarn <- opt_primWarn <$> Lens.use clashOpts
+          seen <- Set.member nm <$> Lens.use seenPrimitives
+          case (wn, primWarn, seen, isTB) of
+            (Just msg, True, False, False) -> do
+              liftIO $ warn opts $ "Dubious primitive instantiation: "
+                                ++ unpack msg
+                                ++ " (disable with -fclash-no-prim-warn)"
+            _ ->
+              return ()
+
+          seenPrimitives %= (Set.insert nm)
+
           case kind p of
             TDecl -> do
               let tempD = template p

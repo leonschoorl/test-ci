@@ -8,10 +8,12 @@
   Module that connects all the parts of the Clash compiler library
 -}
 
+{-# LANGUAGE LambdaCase               #-}
 {-# LANGUAGE NondecreasingIndentation #-}
 {-# LANGUAGE ScopedTypeVariables      #-}
 {-# LANGUAGE TemplateHaskell          #-}
 {-# LANGUAGE TupleSections            #-}
+{-# LANGUAGE ViewPatterns             #-}
 
 module Clash.Driver where
 
@@ -114,10 +116,9 @@ generateHDL
   -- ^ Debug information level for the normalization process
   -> (Clock.UTCTime,Clock.UTCTime)
   -> IO ()
-generateHDL reprs bindingsMap hdlState primMap tcm tupTcm typeTrans eval topEntities
-  opts (startTime,prepTime) = go prepTime [] topEntities where
+generateHDL reprs bindingsMap hdlState primMap tcm tupTcm typeTrans eval
+  topEntities opts (startTime,prepTime) = go prepTime [] topEntities where
 
-  -- No more TopEntities to process
   go prevTime _ [] = putStrLn $ "Total compilation took " ++
                               show (Clock.diffUTCTime prevTime startTime)
 
@@ -224,9 +225,9 @@ generateHDL reprs bindingsMap hdlState primMap tcm tupTcm typeTrans eval topEnti
       putStrLn $ "Normalisation took " ++ show prepNormDiff
 
       -- 2. Generate netlist for topEntity
-      (netlist,seen') <- genNetlist reprs transformedBindings is0 topEntities primMap
-                                tcm typeTrans iw mkId extId seen
-                                hdlDir prefixM topEntity
+      (netlist,seen') <-
+        genNetlist False opts reprs transformedBindings is0 topEntities primMap
+                   tcm typeTrans iw mkId extId seen hdlDir prefixM topEntity
 
       netlistTime <- netlist `deepseq` Clock.getCurrentTime
       let normNetDiff = Clock.diffUTCTime netlistTime normTime
@@ -260,9 +261,9 @@ generateHDL reprs bindingsMap hdlState primMap tcm tupTcm typeTrans eval topEnti
       putStrLn $ "Testbench normalisation took " ++ show prepNormDiff
 
       -- 2. Generate netlist for topEntity
-      (netlist,seen'') <- genNetlist reprs transformedBindings is0 topEntities primMap
-                              tcm typeTrans iw mkId extId seen'
-                              hdlDir prefixM tb
+      (netlist,seen'') <-
+        genNetlist True opts reprs transformedBindings is0 topEntities primMap
+                   tcm typeTrans iw mkId extId seen' hdlDir prefixM tb
 
       netlistTime <- netlist `deepseq` Clock.getCurrentTime
       let normNetDiff = Clock.diffUTCTime netlistTime normTime
@@ -344,12 +345,12 @@ compilePrimitive pkgDbs topDir (BlackBoxHaskell bbName bbGenName source) = do
       Hint.setImports [ "Clash.Netlist.BlackBox.Types",  qualMod]
       Hint.unsafeInterpret funcName "BlackBoxFunction"
 
-compilePrimitive pkgDbs topDir (BlackBox pNm tkind oReg libM imps incs templ) = do
+compilePrimitive pkgDbs topDir (BlackBox pNm tkind warnings oReg libM imps incs templ) = do
   libM'  <- mapM parseTempl libM
   imps'  <- mapM parseTempl imps
   incs'  <- mapM (traverse parseBB) incs
   templ' <- parseBB templ
-  return (BlackBox pNm tkind oReg libM' imps' incs' templ')
+  return (BlackBox pNm tkind warnings oReg libM' imps' incs' templ')
  where
   interpreterArgs = concatMap (("-package-db":) . (:[])) pkgDbs
 

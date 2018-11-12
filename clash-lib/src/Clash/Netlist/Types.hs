@@ -35,6 +35,7 @@ import Data.Bits                            (testBit)
 import Data.Binary                          (Binary(..))
 import Data.Hashable
 import Data.IntMap                          (IntMap, empty)
+import qualified Data.Set                   as Set
 import Data.Text                            (Text, pack)
 import Data.Typeable                        (Typeable)
 import Data.Text.Prettyprint.Doc.Extra      (Doc)
@@ -49,7 +50,7 @@ import Clash.Core.Type                      (Type)
 import Clash.Core.Var                       (Attr')
 import Clash.Core.TyCon                     (TyConMap)
 import Clash.Core.VarEnv                    (VarEnv, InScopeSet)
-import Clash.Driver.Types                   (BindingMap)
+import Clash.Driver.Types                   (BindingMap, ClashOpts)
 import Clash.Netlist.BlackBox.Types         (BlackBoxTemplate)
 import Clash.Netlist.Id                     (IdType)
 import Clash.Primitives.Types               (CompiledPrimMap)
@@ -68,19 +69,28 @@ newtype NetlistMonad a =
 -- | State of the NetlistMonad
 data NetlistState
   = NetlistState
-  { _bindings       :: BindingMap -- ^ Global binders
-  , _varCount       :: !Int -- ^ Number of signal declarations
-  , _components     :: VarEnv (SrcSpan,[Identifier],Component) -- ^ Cached components
-  , _primitives     :: CompiledPrimMap -- ^ Primitive Definitions
+  { _bindings       :: BindingMap
+  -- ^ Global binders
+  , _varCount       :: !Int
+  -- ^ Number of signal declarations
+  , _components     :: VarEnv (SrcSpan,[Identifier],Component)
+  -- ^ Cached components
+  , _primitives     :: CompiledPrimMap
+  -- ^ Primitive Definitions
   , _typeTranslator :: CustomReprs -> TyConMap -> Bool -> Type -> Maybe (Either String HWType)
   -- ^ Hardcoded Type -> HWType translator
-  , _tcCache        :: TyConMap-- ^ TyCon cache
+  , _tcCache        :: TyConMap
+  -- ^ TyCon cache
   , _curCompNm      :: !(Identifier,SrcSpan)
   , _intWidth       :: Int
   , _mkIdentifierFn :: IdType -> Identifier -> Identifier
   , _extendIdentifierFn :: IdType -> Identifier -> Identifier -> Identifier
   , _seenIds        :: [Identifier]
   , _seenComps      :: [Identifier]
+  , _seenPrimitives :: Set.Set Text
+  -- ^ Keeps track of invocations of ´mkPrimitive´. It is currently used to
+  -- filter duplicate warning invocations for dubious blackbox instantiations,
+  -- see GitHub pull request #286.
   , _componentNames :: VarEnv Identifier
   , _topEntityAnns  :: VarEnv (Type, Maybe TopEntity)
   , _hdlDir         :: FilePath
@@ -90,6 +100,10 @@ data NetlistState
   -- ^ Prefix for top-level components, and prefix for all other components
   , _customReprs    :: CustomReprs
   , _globalInScope  :: InScopeSet
+  , _clashOpts      :: ClashOpts
+  -- ^ Settings Clash was called with
+  , _isTestBench    :: Bool
+  -- ^ Whether we're compiling a testbench (suppresses some warnings)
   }
 
 -- | Signal reference
