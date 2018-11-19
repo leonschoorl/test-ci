@@ -1,3 +1,6 @@
+-- on ghc 8.6 haddock and doctests are broken for clash-prelude
+-- this configuration disables them
+
 -- use latest packages from hackage
 index-state: HEAD
 
@@ -9,8 +12,8 @@ package clash-lib
   documentation: True
   flags: +debug
 package clash-prelude
-  documentation: True
-  flags: +doctests
+  documentation: False
+  flags: -doctests
   tests: True
 package clash-cosim
   documentation: True
