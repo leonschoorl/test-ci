@@ -40,7 +40,7 @@ jobs:
     - &test
       stage: test
       compiler: "ghc-8.2.2"
-      script: docker run -e THREADS=$THREADS -e GHC=$GHC -v $PWD:/root/build -it ${DOCKER_IMAGE} bash -c "cd /root/build && .ci/setup.sh && .ci/build.sh && .ci/test.sh"
+      script: docker run -e THREADS=$THREADS -e GHC=$GHC -v $PWD:/root/build -it ${DOCKER_IMAGE} bash -c "cd /root/build && .ci/setup-system.sh && .ci/setup-project.sh && .ci/build.sh && .ci/test.sh"
 
     - <<: *test
       compiler: "ghc-8.4.4"

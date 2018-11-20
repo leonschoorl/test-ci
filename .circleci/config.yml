@@ -3,16 +3,15 @@ version: 2
 aliases:
   - &env
     DEBIAN_FRONTEND: noninteractive
-    CABAL_VERSION: head
     TERM: xterm-color
   - &submodules
     run:
       name: "Checkout submodules"
       command: git submodule update --init --depth 1
-  - &install_ghc
+  - &setup_system
     run:
-      name: Install ghc and cabal-install
-      command: apt-get update -q && apt-get install -yq cabal-install-$CABAL_VERSION ghc-$GHC_VERSION
+      name: Setup system
+      command: .ci/setup-system.sh
   - &cache_restore
     restore_cache:
       keys:
@@ -24,40 +23,16 @@ aliases:
       paths:
         - /root/.cabal/store
 
-  - &configure_project
+  - &setup_project
     run:
-      name: Configure project
-      command: |
-        cat > cabal.project.local << END_CABAL_PROJECT_LOCAL
-        package clash-prelude
-          documentation: True
-        package clash-lib
-          documentation: True
-        package clash-cosim
-          documentation: True
-        package clash-testsuite
-          flags: cosim travisci
-        END_CABAL_PROJECT_LOCAL
+      name: Setup project
+      command: .ci/setup-project.sh
 
-  - &cabal-update
-    run: cabal new-update
+  - &build
+    run: .ci/build.sh
 
-  - &build-all
-    run: cabal new-build all
-
-  - &build-all-constraint
-    run:
-      name: Build with installed constraints for packages in global-db
-      command: |
-        echo cabal new-build $(ghc-pkg list --global --simple-output --names-only | sed 's/\([a-zA-Z0-9-]\{1,\}\) */--constraint="\1 installed" /g') all | sh
-
-  - &run-tests-cabal
-    run: cabal new-test all
-
-  - &run-clash-testsuite
-    run:
-      name: Run clash-testsuite
-      command: cabal new-run -- clash-testsuite -j16
+  - &run-tests
+    run: .ci/test.sh
 
   # When testing a pull request on CircleCI,
   # fetch the result of merging it in.
@@ -78,15 +53,12 @@ aliases:
       - checkout
       - *merge_pullrequest
       - *submodules
-      - *install_ghc
-      - *configure_project
+      - *setup_system
+      - *setup_project
       - *cache_restore
-      - *cabal-update
-      - *build-all
-      - *build-all-constraint
-      - *run-tests-cabal
+      - *build
+      - *run-tests
       - *cache_save
-      - *run-clash-testsuite
 
 workflows:
   version: 2
@@ -100,15 +72,15 @@ jobs:
   ghc-8.2.2:
     environment:
       <<: *env
-      GHC_VERSION: 8.2.2
+      GHC: ghc-8.2.2
     <<: *build_default
   ghc-8.4.4:
     environment:
       <<: *env
-      GHC_VERSION: 8.4.4
+      GHC: ghc-8.4.4
     <<: *build_default
   ghc-8.6.2:
     environment:
       <<: *env
-      GHC_VERSION: 8.6.2
+      GHC: ghc-8.6.2
     <<: *build_default

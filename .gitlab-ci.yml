@@ -11,7 +11,8 @@ image: leonschoorl/clash-ci-image:trusty
     - pwd
     - export
     - export GHC="$CI_JOB_NAME"
-    - .ci/setup.sh
+    - .ci/setup-system.sh
+    - .ci/setup-project.sh
     - .ci/build.sh
     - .ci/test.sh
 
