@@ -23,7 +23,7 @@ aliases:
     save_cache:
       key: cabal-store-{{ .Environment.CIRCLE_JOB }}-{{ checksum ".circleci/config.yml" }}-{{ checksum "cabal.project" }}
       paths:
-        - /root/.cabal/store
+        - cabal-store
 
   - &setup_project
     run:
