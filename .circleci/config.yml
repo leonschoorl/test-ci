@@ -4,6 +4,8 @@ aliases:
   - &env
     DEBIAN_FRONTEND: noninteractive
     TERM: xterm-color
+    THREADS: 2
+
   - &submodules
     run:
       name: "Checkout submodules"
