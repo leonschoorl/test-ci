@@ -207,7 +207,7 @@ It instead exports the identically named functions defined in terms of
 -- >         => Signal domain Int -> Vec 4 (Signal domain Int)
 -- > window4 = window
 --
--- >>> simulateB window4 [1::Int,2,3,4,5] :: [Vec 4 Int]
+-- >>> simulateB window4 [0,1::Int,2,3,4,5] :: [Vec 4 Int]
 -- [<1,0,0,0>,<2,1,0,0>,<3,2,1,0>,<4,3,2,1>,<5,4,3,2>...
 -- ...
 window
