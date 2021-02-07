@@ -203,12 +203,12 @@ It instead exports the identically named functions defined in terms of
 
 -- | Give a window over a 'Signal'
 --
--- > window4 :: HiddenClockReset domain gated synchronous
--- >         => Signal domain Int -> Vec 4 (Signal domain Int)
--- > window4 = window
+-- > window3 :: HiddenClockReset domain gated synchronous
+-- >         => Signal domain Int -> Vec 3 (Signal domain Int)
+-- > window3 = window
 --
--- >>> simulateB window4 [1::Int,2,3,4,5] :: [Vec 4 Int]
--- [<1,0,0,0>,<2,1,0,0>,<3,2,1,0>,<4,3,2,1>,<5,4,3,2>...
+-- >>> simulateB window3 [1::Int,2,3,4,5] :: [Vec 3 Int]
+-- [<1,0,0>,<2,1,0>,<3,2,1>,<4,3,2>,<5,4,3>...
 -- ...
 window
   :: (KnownNat n, Default a, Undefined a, HiddenClockReset domain gated synchronous)
